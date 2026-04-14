@@ -15,6 +15,12 @@ if __name__ == "__main__":
     speak("Initializing Voldemort")
 
     while True:
+<<<<<<< HEAD
+=======
+        with sr.Microphone() as source:
+            print("Listening...")
+            audio = recognizer.listen(source,timeout=2)
+>>>>>>> f5003c95af6c874b564b2964735bb93f0354d0bf
         print("recognizing...")
         try:
             with sr.Microphone() as source:
