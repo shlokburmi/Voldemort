@@ -14,8 +14,8 @@ if __name__ == "__main__":
     while True:
         with sr.Microphone() as source:
             print("Listening...")
-            audio = recognizer.listen(source)
-
+            audio = recognizer.listen(source,timeout=2)
+        print("recognizing...")
         try:
             command = recognizer.recognize_google(audio)  
             print("You said:", command)
