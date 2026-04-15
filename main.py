@@ -5,21 +5,29 @@ import os
 from gtts import gTTS
 from playsound import playsound
 import requests
+import time
 
 # Initialize recognizer
 r = sr.Recognizer()
-newsapi="f81e6ea60f4947baad799c7ac9738dff"
 
-# 🔊 Speak function (RELIABLE)
+# News API
+newsapi = "f81e6ea60f4947baad799c7ac9738dff"
+
+# 🔊 Speak function (stable)
 def speak(text):
     print("Assistant:", text)
+    try:
+        filename = "voice.mp3"
 
-    tts = gTTS(text=text, lang='en', tld='co.in')
-    filename = "voice.mp3"
+        tts = gTTS(text=text, lang='en', tld='co.in')
+        tts.save(filename)
 
-    tts.save(filename)
-    playsound(filename)
-    os.remove(filename)
+        playsound(filename)
+        os.remove(filename)
+
+    except Exception as e:
+        print("TTS Error:", e)
+
 
 # 🎯 Command handler
 def process_command(command):
@@ -49,21 +57,47 @@ def process_command(command):
     elif "open x" in command:
         speak("Opening X")
         webbrowser.open("https://www.x.com")
-    elif "news" in command.lower():
-        r=requests.get(f"https://newsapi.org/v2/top-headlines?country=in&apiKey={newsapi}")
-        if r.status_code == 200:
-            # Parse the JSON response
-            data = r.json()
 
-            # Extract the articles
-            articles = data.get('articles', [])
+    # 📰 NEWS FEATURE (FIXED)
+    elif "news" in command:
+        speak("Fetching news")
 
-            # Print the headlines
-            for article in articles:
-                speak(article['title'])
+        try:
+            response = requests.get(
+            f"https://newsapi.org/v2/everything?q=india&sortBy=publishedAt&apiKey={newsapi}"
+                )
 
+            print("Status Code:", response.status_code)
 
-    # 🎵 Play Music
+            if response.status_code == 200:
+                data = response.json()
+                articles = data.get('articles', [])
+
+                print("Articles count:", len(articles))
+
+                if not articles:
+                    speak("No news found")
+                    return
+
+                speak("Here are the top headlines")
+
+                for i, article in enumerate(articles[:5]):
+                    title = article.get("title")
+
+                    print(f"Headline {i+1}:", title)
+
+                    if title and title != "[Removed]":
+                        speak(title)
+                        time.sleep(1)
+
+            else:
+                speak("Unable to fetch news")
+
+        except Exception as e:
+            print("News Error:", e)
+            speak("Error getting news")
+
+    # 🎵 MUSIC
     elif command.startswith("play"):
         song = command.replace("play", "").strip()
 
@@ -79,9 +113,10 @@ def process_command(command):
             speak("Song not found")
             print("Available songs:", list(musicLibrary.music.keys()))
 
-# 🚀 Main
+
+# 🚀 MAIN LOOP
 if __name__ == "__main__":
-    speak("Initializing Voldemort")
+    speak("Initializing Voldemort ")
 
     while True:
         print("\nListening for command...")
@@ -101,11 +136,10 @@ if __name__ == "__main__":
                 command = word.replace("voldemort", "").strip()
 
                 if command == "":
-                    speak("yeah")   # ✅ ALWAYS speaks now
+                    speak("yeah, I'm listening")   # ✅ natural speed
                 else:
                     speak("yeah, tell me")
                     process_command(command)
-
             else:
                 process_command(word)
 
