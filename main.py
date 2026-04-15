@@ -4,9 +4,11 @@ import musicLibrary
 import os
 from gtts import gTTS
 from playsound import playsound
+import requests
 
 # Initialize recognizer
 r = sr.Recognizer()
+newsapi="f81e6ea60f4947baad799c7ac9738dff"
 
 # 🔊 Speak function (RELIABLE)
 def speak(text):
@@ -47,6 +49,19 @@ def process_command(command):
     elif "open x" in command:
         speak("Opening X")
         webbrowser.open("https://www.x.com")
+    elif "news" in command.lower():
+        r=requests.get(f"https://newsapi.org/v2/top-headlines?country=in&apiKey={newsapi}")
+        if r.status_code == 200:
+            # Parse the JSON response
+            data = r.json()
+
+            # Extract the articles
+            articles = data.get('articles', [])
+
+            # Print the headlines
+            for article in articles:
+                speak(article['title'])
+
 
     # 🎵 Play Music
     elif command.startswith("play"):
