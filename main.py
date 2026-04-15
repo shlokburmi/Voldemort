@@ -91,7 +91,7 @@ def process_command(command):
                         time.sleep(1)
 
             else:
-                speak("Unable to fetch news")
+                pass
 
         except Exception as e:
             print("News Error:", e)
