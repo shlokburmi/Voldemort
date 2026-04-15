@@ -5,6 +5,7 @@ import webbrowser
 # Initialize
 r = sr.Recognizer()
 engine = pyttsx3.init()
+import musicLibrary
 
 def speak(text):
     print("Assistant:", text)
@@ -39,8 +40,19 @@ def process_command(command):
         speak("Opening x")
         webbrowser.open("https://www.x.com")
 
-    else:
-        speak("Sorry, I didn't understand that command")
+    elif command.startswith("play"):
+        song = command.replace("play", "").strip()
+
+        found = False
+        for key in musicLibrary.music:
+            if song in key:
+                speak(f"Playing {key}")
+                webbrowser.open(musicLibrary.music[key])
+                found = True
+                break
+
+        if not found:
+            speak("Song not found")
 
 if __name__ == "__main__":
     speak("Initializing Voldemort")
