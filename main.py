@@ -1,17 +1,25 @@
 import speech_recognition as sr
-import pyttsx3
 import webbrowser
-
-# Initialize
-r = sr.Recognizer()
-engine = pyttsx3.init()
 import musicLibrary
+import os
+from gtts import gTTS
+from playsound import playsound
 
+# Initialize recognizer
+r = sr.Recognizer()
+
+# 🔊 Speak function (RELIABLE)
 def speak(text):
     print("Assistant:", text)
-    engine.say(text)
-    engine.runAndWait()
 
+    tts = gTTS(text=text, lang='en', tld='co.in')
+    filename = "voice.mp3"
+
+    tts.save(filename)
+    playsound(filename)
+    os.remove(filename)
+
+# 🎯 Command handler
 def process_command(command):
     command = command.lower()
     print("Processing:", command)
@@ -36,10 +44,11 @@ def process_command(command):
         speak("Opening LinkedIn")
         webbrowser.open("https://www.linkedin.com")
 
-    elif "open x" in command or "open x" in command:
-        speak("Opening x")
+    elif "open x" in command:
+        speak("Opening X")
         webbrowser.open("https://www.x.com")
 
+    # 🎵 Play Music
     elif command.startswith("play"):
         song = command.replace("play", "").strip()
 
@@ -53,7 +62,9 @@ def process_command(command):
 
         if not found:
             speak("Song not found")
+            print("Available songs:", list(musicLibrary.music.keys()))
 
+# 🚀 Main
 if __name__ == "__main__":
     speak("Initializing Voldemort")
 
@@ -70,21 +81,28 @@ if __name__ == "__main__":
 
             word = word.lower()
 
-            # Handle wake word (optional)
+            # 🎤 Wake word
             if "voldemort" in word:
-                speak("Yes, I am here")
                 command = word.replace("voldemort", "").strip()
-            else:
-                command = word
 
-            if command:
-                process_command(command)
+                if command == "":
+                    speak("yeah")   # ✅ ALWAYS speaks now
+                else:
+                    speak("yeah, tell me")
+                    process_command(command)
+
+            else:
+                process_command(word)
 
         except sr.WaitTimeoutError:
             print("No speech detected (timeout)")
 
         except sr.UnknownValueError:
             print("Could not understand audio")
+
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            break
 
         except Exception as e:
             print("Error:", e)
